@@ -1,0 +1,72 @@
+version: "3.3"
+
+services:
+
+  php:
+    container_name: php
+    build:
+      context: ./docker/php
+    restart: unless-stopped
+    volumes:
+      - ./:/var/www/html
+      - ./docker/php/conf.d:/usr/local/etc/php/conf.d
+
+  nginx:
+    container_name: nginx
+    image: library/nginx:1.19.0
+    restart: unless-stopped
+    depends_on:
+      - php
+    ports:
+      - 80:80
+      - 443:443
+    volumes:
+      - ./:/var/www/html
+      - ./docker/nginx/conf.d:/etc/nginx/conf.d
+      - ./docker/nginx/ssl:/etc/nginx/ssl
+    links:
+      - php
+
+  redis:
+    container_name: redis
+    image: library/redis:6.0.5
+    restart: unless-stopped
+    ports: 
+      - 6379:6379
+    expose: 
+      - 6379
+    links:
+      - php
+
+  mysql:
+    container_name: mysql
+    image: library/mysql:8.0.20
+    restart: unless-stopped
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_DATABASE=${DB_DATABASE}
+      - MYSQL_USER=${DB_USERNAME}
+      - MYSQL_PASSWORD=${DB_PASSWORD}
+    volumes:
+      - data-mysql:/var/lib/mysql
+    ports: 
+      - 3306:3306
+    expose:
+      - 3306
+
+  phpmyadmin:
+    container_name: phpmyadmin
+    image: phpmyadmin/phpmyadmin
+    restart: unless-stopped
+    environment:
+      - PMA_ARBITRARY=1
+      - PMA_HOST=${DB_HOST}
+      - PMA_USER=${DB_USERNAME}
+      - PMA_PASSWORD=${DB_PASSWORD}
+    ports:
+      - 8090:80
+    links:
+      - mysql
+
+volumes:
+  data-mysql: {}
