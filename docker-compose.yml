@@ -31,12 +31,8 @@ services:
     container_name: redis
     image: library/redis:6.0.5
     restart: unless-stopped
-    ports: 
-      - 6379:6379
     expose: 
       - 6379
-    links:
-      - php
 
   mysql:
     container_name: mysql
@@ -49,8 +45,6 @@ services:
       - MYSQL_PASSWORD=${DB_PASSWORD}
     volumes:
       - data-mysql:/var/lib/mysql
-    ports: 
-      - 3306:3306
     expose:
       - 3306
 

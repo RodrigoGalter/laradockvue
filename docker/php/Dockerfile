@@ -21,7 +21,7 @@ RUN apt-get update && \
     # Extensions
     docker-php-ext-configure intl && \
     docker-php-ext-configure gd --with-jpeg && \
-    docker-php-ext-install pcntl bcmath pdo_mysql mysqli gd intl && \
+    docker-php-ext-install pcntl bcmath pdo_mysql mysqli gd zip intl && \
     # Cron
     echo "*/1 * * * * www-data /var/www/html/artisan schedule:run >> /var/www/html/storage/logs/api-schedule.log 2>&1" >> /etc/crontab && \
     apt-get autoclean -y && \
@@ -33,6 +33,12 @@ COPY supervisor /etc/supervisor/conf.d
 # Composer
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer && \
     chmod +x /usr/local/bin/composer
+
+# Nodejs
+RUN curl -sL https://deb.nodesource.com/setup_14.x -o nodesource_setup.sh && \
+    bash nodesource_setup.sh && \
+    apt-get install -y nodejs && \
+    rm nodesource_setup.sh
 
 WORKDIR /var/www/html
 
